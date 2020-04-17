@@ -16,6 +16,14 @@ class CreateTransactionService {
 
   public execute({title, value, type}: Request): Transaction {
 
+    if (type === 'outcome') {
+      const { total } = this.transactionsRepository.getBalance();
+
+      if (total - value < 0) {
+        throw Error('Your outcomes will overpass your incomes');
+      }
+    }
+
     const transaction = this.transactionsRepository.create({
       title,
       value,
