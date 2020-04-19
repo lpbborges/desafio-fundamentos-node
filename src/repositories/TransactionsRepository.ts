@@ -19,7 +19,7 @@ class TransactionsRepository {
     this.transactions = [];
   }
 
-  public all(): object {
+  public all(): { transactions: Transaction[], balance: Balance } {
     return {
       transactions: this.transactions,
       balance: this.getBalance(),
