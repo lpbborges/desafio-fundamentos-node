@@ -19,42 +19,36 @@ class TransactionsRepository {
     this.transactions = [];
   }
 
-  public all(): { transactions: Transaction[], balance: Balance } {
-    return {
-      transactions: this.transactions,
-      balance: this.getBalance(),
-    };
+  public all(): Transaction[] {
+    return this.transactions;
   }
 
   public getBalance(): Balance {
-    const sum = (value: number, currentValue: number): number =>
-      value + currentValue;
+    const { income, outcome } = this.transactions.reduce(
+      (accumulator: Balance, transaction: Transaction) => {
+        switch (transaction.type) {
+          case 'income':
+            accumulator.income += transaction.value;
+            break;
+          case 'outcome':
+            accumulator.outcome += transaction.value;
+            break;
+          default:
+            break;
+        }
 
-    const totalIncomes = this.transactions
-      .filter(transaction => transaction.type === 'income')
-      .map(transactions => transactions.value)
-      .reduce(sum, 0);
+        return accumulator;
+      },
+      {
+        income: 0,
+        outcome: 0,
+        total: 0,
+      },
+    );
 
-    const totalOutcomes = this.transactions
-      .filter(transaction => transaction.type === 'outcome')
-      .map(transactions => transactions.value)
-      .reduce(sum, 0);
+    const total = income - outcome;
 
-    const totalBalance = this.transactions
-      .map(transactions =>
-        transactions.type === 'outcome'
-          ? -transactions.value
-          : transactions.value,
-      )
-      .reduce(sum, 0);
-
-    const balance = {
-      income: totalIncomes,
-      outcome: totalOutcomes,
-      total: totalBalance,
-    };
-
-    return balance;
+    return { income, outcome, total };
   }
 
   public create({ title, value, type }: CreateTransactionDTO): Transaction {
